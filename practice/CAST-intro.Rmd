@@ -52,7 +52,7 @@ To do so, we will work with the cookfarm dataset, described in e.g. [Gasch et al
 
 
 ```{r, message = FALSE, warning=FALSE}
-data <- get(load(system.file("extdata","Cookfarm.RData",package="CAST")))
+data <- get(load(system.file("extdata", "Cookfarm.RData", package = "CAST")))
 head(data)
 ```
 
@@ -78,15 +78,14 @@ We see that the data are taken at 42 locations (SOURCEID) over the field. The lo
 ### Data subsetting
 To reduce the data to an amount that can be handeld in a tutorial, let's restrict the data to the depth of -0.3 and to two weeks of the year 2012. After subsetting let's have an overview on the soil moisture time series measured by teh data loggers.
 
-
 ```{r, message = FALSE, warning=FALSE}
 library(lubridate)
 library(ggplot2)
-trainDat <- data[data$altitude==-0.3&
-                   year(data$Date)==2012&
-                   week(data$Date)%in%c(13:14),]
-ggplot(data = trainDat, aes(x=Date, y=VW)) +
-  geom_line(aes(colour=SOURCEID))
+trainDat <- data[data$altitude == -0.3 &
+                   year(data$Date) == 2012 &
+                   week(data$Date) %in% c(13:14), ]
+ggplot(data = trainDat, aes(x = Date, y = VW)) +
+  geom_line(aes(colour = SOURCEID))
 ```
 
 What we can see is that (as expected) each logger location has a unique time series of soil moisture.
@@ -99,13 +98,21 @@ To keep computation time at a minimum, we don't include hyperparameter tuning (h
 
 ```{r, message = FALSE, warning=FALSE}
 library(caret)
-predictors <- c("DEM","BLD","TWI","Precip_cum","cday",
-                "MaxT_wrcc","Precip_wrcc",
-                "Northing","Easting","NDRE.M")
+```
+
+```{r}
+predictors <- c("DEM", "BLD", "TWI", 
+                "Precip_cum", "cday", 
+                "MaxT_wrcc", "Precip_wrcc", 
+                "Northing", "Easting", "NDRE.M")
 set.seed(10)
-model <- train(trainDat[,predictors],trainDat$VW,
-               method="rf",tuneLength=1,importance=TRUE,
-               trControl=trainControl(method="cv",number=5))
+model <- train(
+  trainDat[, predictors], 
+  trainDat$VW,
+  method = "rf",
+  tuneLength = 1,
+  importance = TRUE,
+  trControl = trainControl(method = "cv", number = 5))
 ```
 
 
@@ -153,8 +160,8 @@ Analogous to the random CV we split the data into five folds, hence five model r
 
 ```{r, message = FALSE, warning=FALSE}
 set.seed(10)
-indices <- CreateSpacetimeFolds(trainDat,spacevar = "SOURCEID",
-                                k=5)
+indices <- CreateSpacetimeFolds(trainDat, spacevar = "SOURCEID",
+                                k = 5)
 set.seed(10)
 model_LLO <- train(trainDat[,predictors],trainDat$VW,
                    method="rf",tuneLength=1, importance=TRUE,
@@ -189,10 +196,14 @@ So let's run the ffs on our case study using R² as a metric to select the optim
 
 ```{r, message = FALSE, warning=FALSE}
 set.seed(10)
-ffsmodel_LLO <- ffs(trainDat[,predictors],trainDat$VW,metric="Rsquared",
-                    method="rf",tuneLength=1, verbose=FALSE,
-                    trControl=trainControl(method="cv",
-                                           index = indices$index))
+ffsmodel_LLO <- ffs(
+  trainDat[, predictors], 
+  trainDat$VW, 
+  metric = "Rsquared",
+  method="rf",
+  tuneLength = 1, 
+  verbose = FALSE,
+  trControl = trainControl(method = "cv", index = indices$index))
 ffsmodel_LLO
 ffsmodel_LLO$selectedvars
 ```

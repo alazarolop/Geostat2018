@@ -50,7 +50,7 @@ print(training)
 Using mapview's viewRGB function we can visualize the Sentinel data as true color composite in the geographical context and overlay it with the polygons. Click on the polygons to see which land cover class is assigned to a respective polygon.
 
 ```{r visMV, warning=FALSE, message= FALSE}
-viewRGB(sentinel, r = 3, g = 2, b = 1, map.types = "Esri.WorldImagery")+
+viewRGB(sentinel, r = 3, g = 2, b = 1, map.types = "Esri.WorldImagery") +
   mapview(training)
 ```
 
@@ -59,7 +59,7 @@ viewRGB(sentinel, r = 3, g = 2, b = 1, map.types = "Esri.WorldImagery")+
 In order to train a Random forest model between the spectral properties and the land cover class, we first need to create a data frame that contains the spectral properties of the training sites as well as the corresponding class information. This data frame can be produced with the extract function. The resulting data frame contains the Sentinel data for each pixel overlayed by the polygons. This data frame then still needs to be merged with the information on the land cover class from the shapefile. This happens via the ID of the polygons which are given in the extracted data frame by the column "ID" and in the shapefile by the attribute "id".
 
 ```{r extract}
-extr <- extract(sentinel, training, df=TRUE)
+extr <- terra::extract(sentinel, training, df=TRUE)
 extr <- merge(extr, training, by.x="ID", by.y="id")
 head(extr)
 ```
@@ -71,7 +71,7 @@ In order to keep data for a later (nearly) independent validation as well as to 
 
 ```{r split}
 set.seed(100)
-trainids <- createDataPartition(extr$Class,list=FALSE,p=0.3)
+trainids <- caret::createDataPartition(extr$Class,list=FALSE,p=0.7)
 trainDat <- extr[trainids,]
 testDat <- extr[-trainids,]
 ```
@@ -114,8 +114,11 @@ We then train a random forest model to lean how the classes can be distinguished
 
 ```{r train}
 set.seed(100)
-model <- train(trainDat[,predictors],trainDat[,response],method="rf",
-               trControl=trainControl(method="cv"),importance=TRUE)
+model <- train(
+  trainDat[, predictors],
+  trainDat[, response],
+  method = "rf",
+  trControl = trainControl(method = "cv"), importance = TRUE)
 print(model)
 ```
 
@@ -141,14 +144,18 @@ plot(varImp(model))
 Finally we want to use the model for making spatial predictions, hence for classifying the entire Sentinel scene. Therefore the model is applied on the full raster stack using the predict function from the raster package.
 
 ```{r predict}
-prediction <- predict(sentinel,model)
+prediction <- terra::predict(sentinel, model)
 ```
 
 Now we can create a map with meaningful colors of the predicted land cover.
 
 ```{r predictVIS}
-spplot(prediction,col.regions=c("brown","darkgreen","black","yellow",
-                                "green","white","red","blue"))
+spplot(
+  prediction,
+  col.regions = c(
+      "brown", "darkgreen",
+      "black", "yellow",
+      "green", "white", "red", "blue"))
 ```
 
 ## Model validation
