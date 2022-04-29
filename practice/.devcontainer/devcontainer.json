@@ -1,0 +1,60 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
+// https://github.com/microsoft/vscode-dev-containers/tree/v0.231.6/containers/r
+{
+	"name": "R Geospatial",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": {
+			// Update VARIANT to pick a R version: 4, 4.1, 4.0, or ubuntugis
+			"VARIANT": "ubuntugis",
+			// Start with a minimal image (rocker/r-ver) or a expanded image.
+			// See more details about rocker/r-ver's derived images: https://github.com/rocker-org/rocker-versioned2
+			"BASE_IMAGE": "rocker/geospatial",
+			// Options
+			"ENABLE_JUPYTER": "false",
+			"UPGRADE_PACKAGES": "false",
+      // [Custom] Number of CPU threads
+      "NCPUS": "6"
+		}
+	},
+
+	// Set *default* container specific settings.json values on container create.
+	"settings": {
+    "r.rterm.linux": "/usr/local/bin/radian",
+		"r.bracketedPaste": true,
+		"r.plot.useHttpgd": true,
+    "[r]": {
+      "editor.wordSeparators": "`~!@#%$^&*()-=+[{]}\\|;:'\",<>/?"
+    },
+    // [Custom]
+    "r.sessionWatcher": true,
+    "r.lsp.debug": true,
+    "r.alwaysUseActiveTerminal": true,
+    "r.rmarkdown.codeLensCommands": [
+      "r.runCurrentChunk",
+      "r.goToNextChunk"
+    ],
+    "quarto.mathjax.theme": "dark"
+	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	// For example, if you want to use vscode-jupyter, add "ms-toolsai.jupyter".
+	"extensions": [
+		"ikuyadeu.r",
+		"rdebugger.r-debugger",
+    "quarto.quarto",
+    "ms-azuretools.vscode-docker",
+    "visualstudioexptteam.vscodeintellicode",
+    "christian-kohler.path-intellisense",
+    "eamodio.gitlens"
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "R --version",
+
+	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+	"remoteUser": "rstudio"
+}
